@@ -45,7 +45,7 @@ function FileUpload() {
 
   const handleUpload = () => {
     if(jsonData.length === 0) return message.error('没有数据需要上传')
-    fetch('/api/project/add', {
+    fetch('api/project/add', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
