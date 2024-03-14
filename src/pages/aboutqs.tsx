@@ -1,16 +1,41 @@
-import React, { useState } from 'react';
+import { GetServerSideProps } from 'next'
+import React, { useEffect, useState } from 'react';
 import Papa from 'papaparse';
 import { Upload, Button, message, Typography } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
+import { useRouter } from 'next/router'
 import type { GetProp, UploadProps } from 'antd';
 type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
-function FileUpload() {
+export const getServerSideProps: GetServerSideProps = async (context) => {
+    const { token } = context.query;
+  
+    return {
+      props: {
+        token: token || null,
+      }
+    }
+  }
+  
+function FileUpload({token}) {
 
   const [jsonData, setJsonData] = useState([]);
+  const router = useRouter()
+  const { query } = router
   const { Title, Text } = Typography;
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (typeof token === 'undefined' || token !== 'vdsvr') {
+      router.push('/404')
+    } else {
+      setLoading(false)
+    }
+  }, [])
+  if (loading) {
+    return null
+  }
 
   const handleFileUpload = (file: FileType) => {
- 
 
     Papa.parse(file, {
       header: true,
@@ -44,6 +69,7 @@ function FileUpload() {
   }
 
   const handleUpload = () => {
+
     if(jsonData.length === 0) return message.error('没有数据需要上传')
     fetch('api/project/add', {
       method: 'POST',
